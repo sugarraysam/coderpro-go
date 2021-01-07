@@ -22,6 +22,8 @@ func TestQuickselect(t *testing.T) {
 	for i, tc := range cases {
 		tc := tc
 		t.Run(fmt.Sprintf("quickselect-%d", i), func(t *testing.T) {
+			t.Parallel()
+
 			q1 := cp55.NewQuickselect(copyNumbers(tc.numbers), tc.k)
 			require.Equal(t, q1.SolveSort(), tc.expected)
 

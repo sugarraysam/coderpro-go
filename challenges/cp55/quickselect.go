@@ -1,3 +1,24 @@
+/*
+Kth Largest Element in an Array
+https://leetcode.com/problems/kth-largest-element-in-an-array/
+
+Find the kth largest element in an unsorted array. Note that it is the kth
+largest element in the sorted order, not the kth distinct element.
+
+#1) SolveSort() - sorts then returns kth largest element
+
+	Time Complexity: O(n log n) because we are sorting
+
+	Space Complexity: O(1), sorting in-place
+
+
+#2) SolveQS() - sorts using quickselect algorithm
+
+	Time Complexity: O(n) because we are partitioning only one side
+
+	Space Complexity: O(1), we are swapping and partitioning in place, so no extra memory is used
+*/
+
 package cp55
 
 import (
@@ -14,12 +35,6 @@ func NewQuickselect(numbers []int, k int) *Quickselect {
 	return &Quickselect{Numbers: numbers, K: k}
 }
 
-/* SolveSort - sorts then returns kth largest element
-
-Time Complexity: O(n log n) because we are sorting
-
-Space Complexity: O(1), sorting in-place
-*/
 func (q *Quickselect) SolveSort() int {
 	sort.Ints(q.Numbers)
 	return q.Numbers[len(q.Numbers)-q.K]
