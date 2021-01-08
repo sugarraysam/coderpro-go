@@ -75,7 +75,7 @@ func (n *Node) BFSIterative() (string, error) {
 }
 
 // Tree methods
-func NewTree(vals []string) *Node {
+func NewTreeRecursive(vals []string) *Node {
 	return newTreeHelper(vals, 0)
 }
 
@@ -86,5 +86,40 @@ func newTreeHelper(vals []string, pos int) *Node {
 	root := NewNode(vals[pos])
 	root.Left = newTreeHelper(vals, 2*pos+1)  // odd
 	root.Right = newTreeHelper(vals, 2*pos+2) // even
+	return root
+}
+
+func NewTreeIterative(vals []string) *Node {
+	root := NewNode(vals[0])
+	stack := []*Node{root}
+
+	pos := 1
+	for len(stack) > 0 && pos < len(vals) {
+		// 2 Nils no pop - disgusting code :(
+		if pos+1 < len(vals) && vals[pos] == NilVal && vals[pos+1] == NilVal {
+			pos += 2
+			continue
+		}
+
+		// pop
+		curr := stack[0]
+		stack = stack[1:]
+
+		// left
+		if pos < len(vals) && vals[pos] != NilVal {
+			left := NewNode(vals[pos])
+			curr.Left = left
+			stack = append(stack, left)
+		}
+		pos++
+
+		// right
+		if pos < len(vals) && vals[pos] != NilVal {
+			right := NewNode(vals[pos])
+			curr.Right = right
+			stack = append(stack, right)
+		}
+		pos++
+	}
 	return root
 }

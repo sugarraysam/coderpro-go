@@ -31,9 +31,12 @@ func TestTreeBFS(t *testing.T) {
 		t.Run(fmt.Sprintf("treebfs-%d", i), func(t *testing.T) {
 			t.Parallel()
 
-			got, err := cp57.NewTree(tc.vals).BFSIterative()
-			require.Nil(t, err)
-			require.Equal(t, got, tc.expected)
+			gotT1, err1 := cp57.NewTreeRecursive(tc.vals).BFSIterative()
+			gotT2, err2 := cp57.NewTreeIterative(tc.vals).BFSIterative()
+			require.Nil(t, err1)
+			require.Nil(t, err2)
+			require.Equal(t, gotT1, tc.expected)
+			require.Equal(t, gotT2, tc.expected)
 		})
 	}
 }
