@@ -15,16 +15,20 @@ func TestFindLargestColorPatch(t *testing.T) {
 		t.Run(fmt.Sprintf("gridString-%d", i), func(t *testing.T) {
 			t.Parallel()
 			g := cp58.NewRandomGrid()
-			got, err := g.String()
+			gotString, err := g.String()
 			require.Nil(t, err)
-			require.Greater(t, len(got), 0)
+			require.Greater(t, len(gotString), 0)
 
-			largest := g.FindLargestColorPatch()
-			require.NotEqual(t, largest, -1)
+			// make sure iterative & recursive give same result
+			gotIterative := g.SolveIterative()
+			g.Reset()
+			gotRecursive := g.SolveRecursive()
+			require.Equal(t, gotIterative, gotRecursive)
 
 			// Testing by visual inspection
-			// fmt.Println(got)
-			// fmt.Println(largest)
+			// fmt.Println(gotString)
+			// fmt.Println("iterative: ", gotIterative)
+			// fmt.Println("recursive: ", gotRecursive)
 			// require.True(t, false) // force test runner output
 		})
 	}

@@ -7,7 +7,7 @@ The task is to find out the largest connected component on the grid. Largest com
 a maximum set of cells such that you can move from any cell to any other cell in this set by only moving
 between side-adjacent cells from the set.
 
-My version uses Color vs Not Colored simplification (2 classes)
+My version uses Color vs Not Colored simplification (2 classes).
 
 Time Complexity:
 	O(n * m), where n is # of rows, and m is # of cols, we never visit a node twice because we keep track
@@ -45,7 +45,7 @@ type Grid struct {
 	Cols    int
 }
 
-func NewRandomGrid() Grid {
+func NewRandomGrid() *Grid {
 	nRows := 3 + rand.Intn(8) // rows between [3, 10]
 	nCols := 3 + rand.Intn(8) // cols between [3, 10]
 
@@ -61,10 +61,10 @@ func NewRandomGrid() Grid {
 		}
 		data = append(data, row)
 	}
-	return Grid{Data: data, Visited: make(map[int]bool), Rows: nRows, Cols: nCols}
+	return &Grid{Data: data, Visited: make(map[int]bool), Rows: nRows, Cols: nCols}
 }
 
-func (g Grid) String() (string, error) {
+func (g *Grid) String() (string, error) {
 	var b strings.Builder
 	for _, row := range g.Data {
 		if _, err := b.WriteString(fmt.Sprintf("%s\n", row)); err != nil {
@@ -74,25 +74,26 @@ func (g Grid) String() (string, error) {
 	return b.String(), nil
 }
 
-func (g Grid) FindLargestColorPatch() int {
+//
+// ---------- Iterative solution ----------
+// Uses helper methods for Up,Down,Left,Right, and translates i,j -> pos for hashing
+//
+func (g *Grid) SolveIterative() int {
 	largest := -1
-
 	for i := 0; i < g.Rows; i++ {
 		for j := 0; j < g.Cols; j++ {
 			pos := g.toPos(i, j)
 			if g.isColored(pos) && !g.Visited[pos] {
-				patch := g.BFS(pos)
-				if patch > largest {
-					largest = patch
-				}
+				largest = max(largest, g.BFSIterative(pos))
 			}
 		}
 	}
 	return largest
 }
 
-func (g Grid) BFS(pos int) int {
-	patch := 0
+// CAREFUL ! we can have a same node twice in the neighbors queue
+func (g *Grid) BFSIterative(pos int) int {
+	res := 0
 	neighbors := []int{pos}
 
 	for len(neighbors) > 0 {
@@ -103,29 +104,20 @@ func (g Grid) BFS(pos int) int {
 		// visit?
 		if !g.Visited[curr] {
 			g.Visited[curr] = true
-			patch++
-
-			// up, down, left, right
-			if up := g.Up(curr); up != -1 && g.isColored(up) {
-				neighbors = append(neighbors, up)
-			}
-			if down := g.Down(curr); down != -1 && g.isColored(down) {
-				neighbors = append(neighbors, down)
-			}
-			if left := g.Left(curr); left != -1 && g.isColored(left) {
-				neighbors = append(neighbors, left)
-			}
-			if right := g.Right(curr); right != -1 && g.isColored(right) {
-				neighbors = append(neighbors, right)
+			res++
+			for _, n := range g.Neighbors(curr) {
+				if g.isColored(n) && !g.Visited[n] {
+					neighbors = append(neighbors, n)
+				}
 			}
 		}
 	}
-	return patch
+	return res
 }
 
 // Navigation helper methods
 // toCoord, toPos, Up, Down, Left, Right
-func (g Grid) isColored(pos int) bool {
+func (g *Grid) isColored(pos int) bool {
 	i, j := g.toCoord(pos)
 	return g.Data[i][j] == Color
 }
@@ -136,11 +128,11 @@ func (g Grid) toCoord(pos int) (int, int) {
 	return i, j
 }
 
-func (g Grid) toPos(i, j int) int {
+func (g *Grid) toPos(i, j int) int {
 	return (i * g.Cols) + j
 }
 
-func (g Grid) Up(pos int) int {
+func (g *Grid) Up(pos int) int {
 	i, j := g.toCoord(pos)
 	i -= 1
 	if i >= 0 {
@@ -149,7 +141,7 @@ func (g Grid) Up(pos int) int {
 	return -1
 }
 
-func (g Grid) Down(pos int) int {
+func (g *Grid) Down(pos int) int {
 	i, j := g.toCoord(pos)
 	i += 1
 	if i < g.Rows {
@@ -158,7 +150,7 @@ func (g Grid) Down(pos int) int {
 	return -1
 }
 
-func (g Grid) Left(pos int) int {
+func (g *Grid) Left(pos int) int {
 	i, j := g.toCoord(pos)
 	j -= 1
 	if j >= 0 {
@@ -167,11 +159,72 @@ func (g Grid) Left(pos int) int {
 	return -1
 }
 
-func (g Grid) Right(pos int) int {
+func (g *Grid) Right(pos int) int {
 	i, j := g.toCoord(pos)
 	j += 1
 	if j < g.Cols {
 		return g.toPos(i, j)
 	}
 	return -1
+}
+
+//
+// ---------- Recursive Solution ----------
+//
+//
+func (g *Grid) SolveRecursive() int {
+	largest := -1
+	for i := 0; i < g.Rows; i++ {
+		for j := 0; j < g.Cols; j++ {
+			pos := g.toPos(i, j)
+			if !g.Visited[pos] && g.isColored(pos) {
+				largest = max(largest, g.BFSRecursive(pos))
+			}
+		}
+	}
+	return largest
+}
+
+func (g *Grid) BFSRecursive(pos int) int {
+	// base case
+	if g.Visited[pos] || !g.isColored(pos) {
+		return 0
+	}
+	// visit
+	g.Visited[pos] = true
+	res := 1
+	for _, n := range g.Neighbors(pos) {
+		res += g.BFSRecursive(n)
+	}
+	return res
+}
+
+// Find up, down, left, right neighbors
+func (g *Grid) Neighbors(pos int) []int {
+	var res []int
+	if up := g.Up(pos); up != -1 {
+		res = append(res, up)
+	}
+	if down := g.Down(pos); down != -1 {
+		res = append(res, down)
+	}
+	if left := g.Left(pos); left != -1 {
+		res = append(res, left)
+	}
+	if right := g.Right(pos); right != -1 {
+		res = append(res, right)
+	}
+	return res
+}
+
+// Reset - reset the visited grid
+func (g *Grid) Reset() {
+	g.Visited = make(map[int]bool)
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
