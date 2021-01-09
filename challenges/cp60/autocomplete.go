@@ -23,7 +23,6 @@ Space Complexity:
 package cp60
 
 import (
-	"bytes"
 	"fmt"
 	"regexp"
 )
@@ -34,66 +33,41 @@ const NilVal = ' '
 type Node struct {
 	Char     byte
 	IsWord   bool
-	Children []*Node
+	Children map[byte]*Node
 }
 
-func NewNode(char byte, isWord bool) *Node {
-	return &Node{Char: char, IsWord: isWord, Children: make([]*Node, 0)}
+func NewNode(char byte) *Node {
+	return &Node{Char: char, IsWord: false, Children: make(map[byte]*Node)}
 }
 
-func (n *Node) findOrCreateChild(char byte, isWord bool) *Node {
+func (n *Node) findOrCreateChild(char byte) *Node {
 	child := n.findChild(char)
 	if child == nil {
-		child = NewNode(char, isWord)
-		n.Children = append(n.Children, child)
+		child = NewNode(char)
+		n.Children[char] = child
 	}
 	return child
 }
 
 func (n *Node) findChild(char byte) *Node {
-	for _, child := range n.Children {
-		if child.Char == char {
-			return child
-		}
+	res, ok := n.Children[char]
+	if !ok {
+		return nil
 	}
-	return nil
+	return res
 }
 
 // Trie method
 func NewTrie(words []string) *Node {
-	root := NewNode(NilVal, false) // root is empty
+	root := NewNode(NilVal) // root is empty
 	for _, word := range words {
-		curr := root.findOrCreateChild(word[0], false)
-		lastCharIdx := len(word) - 1
+		curr := root.findOrCreateChild(word[0])
 		for i := 1; i < len(word); i++ { // ignore first letter
-			curr = curr.findOrCreateChild(word[i], i == lastCharIdx)
+			curr = curr.findOrCreateChild(word[i])
 		}
+		curr.IsWord = true
 	}
 	return root
-}
-
-func (n *Node) StringPerLevel() (string, error) {
-	var b bytes.Buffer
-	stack := []*Node{n}
-
-	for len(stack) > 0 {
-		levelSize := len(stack)
-		for levelSize > 0 {
-			// pop
-			curr := stack[0]
-			stack = stack[1:]
-
-			if _, err := b.WriteString(fmt.Sprintf("%c ", curr.Char)); err != nil {
-				return "", err
-			}
-			stack = append(stack, curr.Children...)
-			levelSize--
-		}
-		if err := b.WriteByte('\n'); err != nil {
-			return "", err
-		}
-	}
-	return b.String(), nil
 }
 
 func (n *Node) SolveTrie(words []string, prefix string) []string {
