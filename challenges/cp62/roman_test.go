@@ -25,6 +25,7 @@ func TestRoman(t *testing.T) {
 			r := cp62.NewRoman(tc.roman)
 			require.Equal(t, r.SolveIterative(), tc.expected)
 			require.Equal(t, r.SolveRecursive(), tc.expected)
+			require.Equal(t, r.SolveReversedIteration(), tc.expected)
 		})
 	}
 }

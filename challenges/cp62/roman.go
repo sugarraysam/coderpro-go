@@ -54,7 +54,7 @@ func NewRoman(val string) *Roman {
 }
 
 func (r *Roman) toInt(i int) int {
-	if i >= r.Len() {
+	if i >= r.Len() || i < 0 {
 		return -1
 	}
 	return RomanToInt[r.Val[i]]
@@ -98,5 +98,20 @@ func (r *Roman) helper(pos int) int {
 		nextPos++
 	}
 	res += r.helper(nextPos)
+	return res
+}
+
+func (r *Roman) SolveReversedIteration() int {
+	res := 0
+	prev := -1
+	for i := r.Len() - 1; i >= 0; i-- {
+		val := r.toInt(i)
+		if val < prev {
+			res -= val
+		} else {
+			res += val
+		}
+		prev = val
+	}
 	return res
 }
