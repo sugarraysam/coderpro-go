@@ -12,21 +12,22 @@ func TestConsecutiveBits(t *testing.T) {
 	cases := []struct {
 		dec             int
 		expectedBin     []int
+		expectedStr     string
 		expectedLargest int
 	}{
 		{
 			dec:             242,
-			expectedBin:     []int{1, 1, 1, 1, 0, 0, 1, 0},
+			expectedStr:     "11110010",
 			expectedLargest: 4,
 		},
 		{
 			dec:             155,
-			expectedBin:     []int{1, 0, 0, 1, 1, 0, 1, 1},
+			expectedStr:     "10011011",
 			expectedLargest: 2,
 		},
 		{
 			dec:             12345,
-			expectedBin:     []int{1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1},
+			expectedStr:     "11000000111001",
 			expectedLargest: 3,
 		},
 	}
@@ -35,7 +36,9 @@ func TestConsecutiveBits(t *testing.T) {
 		t.Run(fmt.Sprintf("bits-%d", tc.dec), func(t *testing.T) {
 			t.Parallel()
 			bits := cp65.NewBits(tc.dec)
-			require.Equal(t, bits.Binary, tc.expectedBin)
+			bitsStr, err := bits.String()
+			require.Nil(t, err)
+			require.Equal(t, bitsStr, tc.expectedStr)
 			require.Equal(t, bits.FindLargest(), tc.expectedLargest)
 		})
 	}

@@ -8,39 +8,88 @@ Time Complexity:
 				slice of len log(n) to find the max consecutive ones
 
 Space Complexity:
-	O(log n), we store the log n bits required to represent the decimal number n
+	O(log n), we store the log n bits required to represent the decimal number n in a singly linked list
 */
 package cp65
 
+import "strings"
+
 type Bits struct {
-	Decimal int
-	Binary  []int
+	Dec int
+	Bin *Node
 }
 
 func NewBits(d int) *Bits {
-	return &Bits{Decimal: d, Binary: toBits(d)}
+	return &Bits{Dec: d, Bin: toBits(d)}
 }
 
 // dec is a positive integer
-func toBits(dec int) []int {
-	res := make([]int, 0)
+// storing bits as a singly linked list
+func toBits(dec int) *Node {
+	var lastRoot *Node // nil
 	for dec > 0 {
-		res = append([]int{dec % 2}, res...) // prepend
+		curr := NewNode(getByte(dec), lastRoot)
+		lastRoot = curr
 		dec /= 2
 	}
-	return res
+	return lastRoot
+}
+
+func getByte(d int) byte {
+	if d%2 == 1 {
+		return '1'
+	}
+	return '0'
 }
 
 func (b *Bits) FindLargest() int {
+	return b.Bin.FindLargest()
+}
+
+func (b *Bits) String() (string, error) {
+	return b.Bin.String()
+}
+
+// Singly Linked List
+type Node struct {
+	Bit  byte
+	Next *Node
+}
+
+func NewNode(b byte, n *Node) *Node {
+	return &Node{Bit: b, Next: n}
+}
+
+func (n *Node) String() (string, error) {
+	var b strings.Builder
+	if err := stringHelper(n, &b); err != nil {
+		return "", err
+	}
+	return b.String(), nil
+}
+
+func stringHelper(root *Node, b *strings.Builder) error {
+	if root == nil {
+		return nil
+	}
+	if err := b.WriteByte(root.Bit); err != nil {
+		return err
+	}
+	return stringHelper(root.Next, b)
+}
+
+func (n *Node) FindLargest() int {
 	res := 0
 	sum := 0
-	for pos := 0; pos < len(b.Binary); pos++ {
-		if b.Binary[pos] == 1 {
+	curr := n
+	for curr != nil {
+		if curr.Bit == '1' {
 			sum++
 		} else {
 			res = max(res, sum)
 			sum = 0
 		}
+		curr = curr.Next
 	}
 	return res
 }
