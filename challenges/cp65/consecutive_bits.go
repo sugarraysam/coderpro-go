@@ -4,11 +4,19 @@ Max Consecutive Ones - https://leetcode.com/problems/max-consecutive-ones/
 The problem also adds the dec -> binary conversion dimension.
 
 Time Complexity:
+	[Singly Linked List]
 	O(log n), we will divide the decimal number (n) log n times to get the binary representation, and then iterate over this
 				slice of len log(n) to find the max consecutive ones
 
+	[Shifting]
+	O(log n), we take binary and and right shift the integer n, log n times
+
 Space Complexity:
+	[Snigly Linked List]
 	O(log n), we store the log n bits required to represent the decimal number n in a singly linked list
+
+	[Shifting]
+	O(1), we dont store anything
 */
 package cp65
 
@@ -99,4 +107,20 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// Shifting and & binary operators solution
+func SolveShifting(d int) int {
+	res := 0
+	sum := 0
+	for d > 0 {
+		if d&1 == 1 {
+			sum++
+		} else {
+			res = max(res, sum)
+			sum = 0
+		}
+		d >>= 1 // divide by 2
+	}
+	return max(res, sum)
 }

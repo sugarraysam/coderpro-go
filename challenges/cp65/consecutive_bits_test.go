@@ -40,6 +40,7 @@ func TestConsecutiveBits(t *testing.T) {
 			require.Nil(t, err)
 			require.Equal(t, bitsStr, tc.expectedStr)
 			require.Equal(t, bits.FindLargest(), tc.expectedLargest)
+			require.Equal(t, cp65.SolveShifting(tc.dec), tc.expectedLargest)
 		})
 	}
 }
